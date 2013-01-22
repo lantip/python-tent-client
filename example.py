@@ -88,19 +88,19 @@ if not app.hasPermanentKeys():
 # Note that when auth is present, these may return additional results
 print yellow('PROFILE:')
 profile = app.getProfile()
-debugJson(profile)
+debugJson(profile())
 
 print yellow('FOLLOWINGS[0]:')
 followings = app.getFollowings()
-debugJson(followings[0])
+debugJson(followings()[0])
 
 print yellow('FOLLOWERS[0]:')
 followers = app.getFollowers()
-debugJson(followers[0])
+debugJson(followers()[0])
 
 print yellow('POSTS[0]:')
 posts = app.getPosts()
-debugJson(posts[0])
+debugJson(posts()[0])
 
 
 # Post a new status message

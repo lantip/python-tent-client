@@ -15,7 +15,7 @@ from urllib import urlencode, quote
 from urlparse import urlparse
 from colors import *
 
-requests.defaults.defaults['danger_mode'] = True
+#requests.defaults.defaults['danger_mode'] = True
 
 class DiscoveryFailure(Exception): pass
 class RegistrationFailure(Exception): pass
@@ -208,8 +208,10 @@ class TentApp(object):
         # if authenticate is run later, this session will be replaced with a session that does authentication
         headers = dict(DEFAULT_HEADERS)
         headers['Host'] = urlparse(self.entityUrl).netloc
-        self.session = requests.session(hooks={"pre_request": self._authHook}, headers=headers)
-
+        #self.session = requests.session(hooks={"pre_request": self._authHook}, headers=headers)
+	self.session = requests.Session()
+	self.session.hooks = ({"pre_request": self._authHook})
+	self.session.headers = headers
         # this list of api roots will be filled in by _discoverAPIurls()
         self.apiRootUrls = []
         self._discoverAPIUrls(self.entityUrl)
@@ -218,8 +220,10 @@ class TentApp(object):
         # so we have to make a new session again.
         headers = dict(DEFAULT_HEADERS)
         headers['Host'] = urlparse(self.entityUrl).netloc
-        self.session = requests.session(hooks={"pre_request": self._authHook}, headers=headers)
-
+        #self.session = requests.session(hooks={"pre_request": self._authHook}, headers=headers)
+	self.session = requests.Session()
+	self.session.hooks = ({"pre_request": self._authHook})
+	self.session.headers = headers
 
     #------------------------------------
     #--- misc helpers
@@ -318,7 +322,7 @@ class TentApp(object):
         # which points at the original entityUrl.
         # But now we want to get the profileUrl, which is maybe on a different host.
         r = retry(requests.get,profileUrls[0],headers=DEFAULT_HEADERS)
-        profile = r.json
+        profile = r.json()
         self.entityUrl = removeUnicode(profile['https://tent.io/types/info/core/v0.1.0']['entity'])
         self.apiRootUrls = profile['https://tent.io/types/info/core/v0.1.0']['servers']
         self.apiRootUrls = [removeUnicode(url) for url in self.apiRootUrls]
@@ -367,14 +371,14 @@ class TentApp(object):
         debugDetail('headers from server:')
         debugJson(r.headers)
         debugDetail('json from server:')
-        debugJson(r.json)
-        if r.json is None:
+        debugJson(r.json())
+        if r.json() is None:
             debugError('not json.  here is the actual body text:')
             debugRaw(r.text)
             raise RegistrationFailure
-        self.keys['appID'] = r.json['id'].encode('utf-8')
-        self.keys['registration_mac_key_id'] = r.json['mac_key_id'].encode('utf-8')
-        self.keys['registration_mac_key'] = r.json['mac_key'].encode('utf-8')
+        self.keys['appID'] = r.json()['id'].encode('utf-8')
+        self.keys['registration_mac_key_id'] = r.json()['mac_key_id'].encode('utf-8')
+        self.keys['registration_mac_key'] = r.json()['mac_key'].encode('utf-8')
         debugDetail('registered successfully.  details:')
         debugDetail('  %s'%self.keys)
 
@@ -461,15 +465,15 @@ class TentApp(object):
         debugJson(r.headers)
         debugDetail('response text:')
         debugRaw(r.text)
-        if not r.json:
+        if not r.json():
             debugDetail()
             debugError('auth failed.')
             return
-        debugJson(r.json)
+        debugJson(r.json())
 
         # now we have permanent keys
-        self.keys['permanent_mac_key_id'] = r.json['access_token'].encode('utf-8')
-        self.keys['permanent_mac_key'] = r.json['mac_key'].encode('utf-8')
+        self.keys['permanent_mac_key_id'] = r.json()['access_token'].encode('utf-8')
+        self.keys['permanent_mac_key'] = r.json()['mac_key'].encode('utf-8')
         debugDetail('permanent mac key_id: %s'%self.keys['permanent_mac_key_id'])
         debugDetail('permanent mac key: %s'%self.keys['permanent_mac_key'])
         
@@ -483,11 +487,11 @@ class TentApp(object):
         requestUrl = self.apiRootUrls[0] + resource
         debugRequest(requestUrl)
         r = retry(self.session.get,requestUrl,params=kwargs)
-        if r.json is None:
+        if r.json() is None:
             debugError('not json.  here is the actual body text:')
             debugRaw(r.text)
             return
-        return r.json
+        return r.json()
 
     def getProfile(self):
         """Get your own profile.
@@ -536,10 +540,10 @@ class TentApp(object):
         debugRaw(r.text)
         debugDetail()
         
-        if r.json is None:
+        if r.json() is None:
             debugError('failed to follow.')
             debugDetail()
-        return r.json
+        return r.json()
 
     def getFollowings(self,id=None,**kwargs):
         """Get the entities I'm following.
@@ -631,7 +635,8 @@ class TentApp(object):
         debugJson(r.request.headers)
         debugDetail()
         debugDetail('request data:')
-        debugRaw(r.request.data)
+        #debugRaw(r.request.data)
+        debugRaw(r.request.body)
         debugDetail()
         debugDetail(' --  --  --  --')
         debugDetail()
@@ -642,10 +647,10 @@ class TentApp(object):
         debugRaw(r.text)
         debugDetail()
 
-        if r.json is None:
+        if r.json() is None:
             debugError('failed to put post.')
             debugDetail()
-        return r.json
+        return r.json()
 
     def getPosts(self,id=None,**kwargs):
         """With no auth, fetch your own public posts.
