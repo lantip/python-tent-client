@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 
 from __future__ import division
-import pprint, time
+import pprint
+import time
 import webbrowser
 import tentapp
 from colors import *
 
-def debugJson(s=''): print magenta(pprint.pformat(s))
+
+def debugJson(s=''):
+    print magenta(pprint.pformat(s))
 
 print yellow('-----------------------------------------------------------------------\\')
 
@@ -88,24 +91,24 @@ if not app.hasPermanentKeys():
 # Note that when auth is present, these may return additional results
 print yellow('PROFILE:')
 profile = app.getProfile()
-debugJson(profile())
+debugJson(profile)
 
 print yellow('FOLLOWINGS[0]:')
 followings = app.getFollowings()
-debugJson(followings()[0])
+debugJson(followings[0])
 
 print yellow('FOLLOWERS[0]:')
 followers = app.getFollowers()
-debugJson(followers()[0])
+debugJson(followers[0])
 
 print yellow('POSTS[0]:')
 posts = app.getPosts()
-debugJson(posts()[0])
+debugJson(posts[0])
 
 
 # Post a new status message
 if app.hasPermanentKeys():
-    text = "This is a test message from python-tent-client's example.py.  The time is %s"%int(time.time())
+    text = "This is a test message from python-tent-client's example.py.  The time is %s" % int(time.time())
     post = {
         'type': 'https://tent.io/types/post/status/v0.1.0',
         'published_at': int(time.time()),
@@ -119,8 +122,7 @@ if app.hasPermanentKeys():
     }
     app.putPost(post)
     print yellow('A message has been posted to pythonclienttest.tent.is:')
-    print cyan('    '+text)
+    print cyan('    ' + text)
 
 
 print yellow('-----------------------------------------------------------------------/')
-
